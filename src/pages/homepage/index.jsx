@@ -1,120 +1,113 @@
 import { useEffect, useState } from "react";
 import Search from "../../components/search";
 import "./style.css";
-import RecipeIteam from "../../components/recipe-iteam";
+import RecipeIteam from "../../components/recipe-iteam/index";
 import FavoriteItem from "../../components/favorite-item";
 
-// import { useState } from "react";
-// import './styles.css';
-// import Search from "../../components/search";
-
-const dumydata = "dumydata";
+const dummyData = "dummyData";
 
 const Homepage = () => {
-  // for loading state
   const [loadingState, setLoadingState] = useState(false);
-
-  // save result that we recive from api
-
   const [recipes, setRecipes] = useState([]);
+  const [favorites, setFavorites] = useState([]);
 
-  // favarate data state
-  const [favorates, setFavorates] = useState([]);
+  useEffect(() => {
+    const extractFavoritesFromLocalStorageOnPageLoad = JSON.parse(
+      localStorage.getItem("favorites")
+    );
+    console.log("Favorites from local storage:", extractFavoritesFromLocalStorageOnPageLoad);
+    setFavorites(extractFavoritesFromLocalStorageOnPageLoad);
+  }, []);
+
   const getDataFromSearchComponent = (getData) => {
-    // keep the loading state true before calling api
     setLoadingState(true);
 
-    // console.log(getData, "getdata");
-
-    // calling api
-    async function getReceipes() {
+    async function getRecipes() {
       const apiResponse = await fetch(
-        `https://api.spoonacular.com/recipes/complexSearch?apiKey=308e09b4f1504ff8b29a3adc80f40668&querry=${getData}`
+        `https://api.spoonacular.com/recipes/complexSearch?apiKey=308e09b4f1504ff8b29a3adc80f40668&query=${getData}`
       );
       const result = await apiResponse.json();
 
       const { results } = result;
 
       if (results && results.length > 0) {
-        // set loading status false again
-        // set the recipes state
-
         setLoadingState(false);
         setRecipes(results);
       }
-      // console.log(result);
     }
-    getReceipes();
+    getRecipes();
   };
 
-  // console.log(loadingState, recipes, "loadingState, recipes");
+  const addToFavorites = (getCurrentRecipeItem) => {
+    console.log("Adding to favorites:", getCurrentRecipeItem);
+    let cpyFavorites = [...favorites];
 
-  const addToFavorates = (getCurrentRecipeitem) => {
-    let cpyFavorates = [...favorates];
-
-    // to cheack that item is aalready present in favorates list or not
-    const index = cpyFavorates.findIndex(
-      (item) => item.id === getCurrentRecipeitem.id
+    const index = cpyFavorites.findIndex(
+      (item) => item.id === getCurrentRecipeItem.id
     );
-    // console.log(index);
+
     if (index === -1) {
-      cpyFavorates.push(getCurrentRecipeitem);
-      setFavorates(cpyFavorates);
-      // save the favorates in the local storage
-      localStorage.setItem("favorates", JSON.stringify(cpyFavorates));
+      cpyFavorites.push(getCurrentRecipeItem);
+      setFavorites(cpyFavorites);
+      localStorage.setItem("favorites", JSON.stringify(cpyFavorites));
     } else {
-      alert("Item already present in favorates");
+      alert("Item already present in favorites");
     }
 
-    // console.log(favorates);
-
-    useEffect(() => {
-      console.log("runs only one time on home page load");
-      const extractFavoratesFromLocalStorageOnPageLoad = JSON.parse(
-        localStorage.getItem("favorates")
-      );
-      setFavorates(extractFavoratesFromLocalStorageOnPageLoad);
-    }, []);
-
-    console.log(favorates);
+    // Add a check to make sure favorites is an array before trying to iterate over it
+    if (Array.isArray(cpyFavorites)) {
+      for (let i = 0; i < cpyFavorites.length; i++) {
+        console.log(cpyFavorites[i]);
+      }
+    }
   };
+
+  const removeFromFavorites = (id) => {
+    let cpyFavorites = [...favorites];
+
+    const index = cpyFavorites.findIndex((item) => item.id === id);
+
+    if (index !== -1) {
+      cpyFavorites.splice(index, 1);
+      setFavorites(cpyFavorites);
+      localStorage.setItem("favorites", JSON.stringify(cpyFavorites));
+    }
+  };
+
   return (
     <div className="homepage">
       <Search
         getDataFromSearchComponent={getDataFromSearchComponent}
-        dumycopy={dumydata}
+        dummyCopy={dummyData}
       />
 
-      {/* show favorates item */}
       <div className="favorites-wrapper">
-        <h1 className="favorates-titile">Favorates</h1>
+        <h1 className="favorites-title">Favorites</h1>
         <div className="favorites">
-          {
-            favorates && favorites.length >0 ?
-            favorates.map(iteam=>(
-              <FavoriteItem
-              id={item.id}
-              image={item.image}
-              title={item.title}
-              
-              />
-            ))
-            :null}
+          {favorites && favorites.length > 0
+            ? favorites.map((item) => (
+                <FavoriteItem
+                  key={item.id}
+                  id={item.id}
+                  image={item.image}
+                  title={item.title}
+                  removeFromFavorites={() => removeFromFavorites(item.id)}
+                />
+              ))
+            : null}
         </div>
       </div>
 
-      {/* show loading state */}
       {loadingState && (
-        <div className="loading">Loading recipies ! please wait...</div>
+        <div className="loading">Loading recipes! Please wait...</div>
       )}
-      {/* show loading state */}
 
-      {/* map through all the recipe */}
       <div className="items">
         {recipes && recipes.length > 0
           ? recipes.map((item) => (
               <RecipeIteam
-                addToFavorates={() => addToFavorates(item)}
+                key={item.id}
+                addToFavorites={() => addToFavorites(item)}
                 id={item.id}
                 image={item.image}
                 title={item.title}

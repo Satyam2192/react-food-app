@@ -1,22 +1,21 @@
 
-import "./style.css"
+import "./style.css";
 
+const FavoriteItem = (props) => {
+  const { id, image, title, removeFromFavorites } = props;
 
-const FavoriteItem=(props)=>{
+  return (
+    <div key={id} className="favorite-item">
+      <div>
+        <img src={image} alt="image of recipe" />
+      </div>
+      <p>{title}</p>
 
-    const {id,image,title} = props;
-
-
-    return(
-        <div key={id} className="Favorite-item">
-            <div>
-                <img src={image} alt="image of recipe" />
-            </div>
-            <p>{title}</p>
-
-            <button type="button" >Remove from Favorites</button>
-        </div>
-    )
-}
+      <button type="button" onClick={removeFromFavorites}>
+        Remove from Favorites
+      </button>
+    </div>
+  );
+};
 
 export default FavoriteItem;

@@ -1,21 +1,24 @@
-
 import "./style.css"
 
+const RecipeIteam = (props) => {
 
-const RecipeIteam=(props)=>{
+    const { id, image, title, addToFavorites } = props;
 
-    const {id,image,title, addToFavorates} = props;
+    console.log("Recipe item props:", props);
 
-    console.log(props, 'recipe-item-prps');
+    const handleAddToFavorites = () => {
+        console.log("Adding to favorites:", props);
+        addToFavorites();
+    }
 
-    return(
+    return (
         <div key={id} className="recipe-item">
             <div>
                 <img src={image} alt="image of recipe" />
             </div>
             <p>{title}</p>
 
-            <button type="button" onClick={addToFavorates}>Add to favorates</button>
+            <button type="button" onClick={handleAddToFavorites}>Add to Favorites</button>
         </div>
     )
 }
